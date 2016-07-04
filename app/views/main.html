@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Blog Home - Start Bootstrap Template</title>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="public/blog-home.css" rel="stylesheet">
+</head>
+<body>
+<% include includes/nav.html %>
+<!-- Page Content -->
+<div class="container">
+    <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+            <h1 class="page-header">
+                Page Heading
+                <small>Secondary Text</small>
+            </h1>
+
+            <% posts.forEach(function(post){ %>
+            <h2><a href="#"><%= post.title %></a></h2>
+            <p class="lead">by <a href="index.php"><%= post.author %></a></p>
+            <p><span class="glyphicon glyphicon-time"></span> Posted on <%= post.date %></p>
+            <%- post.preview %>
+            <a class="btn btn-primary" href="/post?id=<%= post.id %>">Read More <span class="glyphicon glyphicon-chevron-right"></span></a>
+            <hr>
+            <% }) %>
+
+            <!-- Pager -->
+            <ul class="pager">
+                <li class="previous">
+                    <a href="#">&larr; Older</a>
+                </li>
+                <li class="next">
+                    <a href="#">Newer &rarr;</a>
+                </li>
+            </ul>
+
+        </div>
+
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+            <% include includes/search.html %>
+            <% include includes/categories.html %>
+            <% include includes/side_widget_well.html %>
+        </div>
+
+    </div>
+    <!-- /.row -->
+    <% include includes/footer.html %>
+</div>
+<!-- /.container -->
+<script src="/node_modules/jquery/dist/jquery.js"></script>
+<script src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
