@@ -20,11 +20,12 @@ app.use(cookieParser());
 //app.use(express.static(path.join(__dirname, '/node_modules')));
 
 app.use('/node_modules/', express.static(__dirname + '/node_modules/'));
-app.use('/public/', express.static(__dirname + '/app/css/'));
+app.use('/public/', express.static(__dirname + '/public'));
+app.use('/page/', express.static(__dirname + '/app/css/'));
 
 
 app.use('/', index);
-//app.use('/search', search);
+//app.use('/page/:number', index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

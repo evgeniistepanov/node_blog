@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <title>Blog Home - Start Bootstrap Template</title>
     <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-    <link href="public/blog-home.css" rel="stylesheet">
+    <link href="/public/css/blog-home.css" rel="stylesheet">
 </head>
 <body>
 <% include includes/nav.html %>
@@ -19,15 +19,20 @@
         <div class="col-md-8">
             <h1 class="page-header">
                 Page Heading
+                <% if (page) { %>
+                <%= page %>
+                <%= rowCounter %>
+                <% } %>
                 <small>Secondary Text</small>
             </h1>
 
             <% posts.forEach(function(post){ %>
-            <h2><a href="#"><%= post.title %></a></h2>
+            <h2><a href="#"><%= post.title %> <%= post.post_id %> </a></h2>
             <p class="lead">by <a href="index.php"><%= post.author %></a></p>
             <p><span class="glyphicon glyphicon-time"></span> Posted on <%= post.date %></p>
-            <%- post.preview %>
-            <a class="btn btn-primary" href="/post?id=<%= post.id %>">Read More <span class="glyphicon glyphicon-chevron-right"></span></a>
+            <%- post.content %>
+            <a class="btn btn-primary" href="/post?id=<%= post.post_id %>">Read More
+                <span class="glyphicon glyphicon-chevron-right"></span></a>
             <hr>
             <% }) %>
 
@@ -52,6 +57,27 @@
 
     </div>
     <!-- /.row -->
+
+    <nav>
+        <ul class="pagination">
+            <li class="disabled"><a href="#" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+            <li class="active"><a href="#">1 <span class="sr-only">(current)</span></a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li><a href="#" aria-label="Next"><span aria-hidden="true">»</span></a></li>
+        </ul>
+    </nav>
+
+    <nav>
+        <ul class="pagination">
+        <% for(var i = paginationObj.from; i < paginationObj.to; i++) { %>
+        <li class="<% if (i === paginationObj.currentPage) { %><%= 'active' %><% } %>"><a href='/page/<%= i %>'>
+            <%= i %></a></li><% } %>
+        </ul>
+    </nav>
+
     <% include includes/footer.html %>
 </div>
 <!-- /.container -->
