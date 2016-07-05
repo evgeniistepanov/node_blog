@@ -3,7 +3,10 @@ var path = require('path');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+
 var index = require('./app/routes/index');
+var view_post = require('./app/routes/view_post');
+
 var app = express();
 
 // view engine setup
@@ -21,17 +24,17 @@ app.use(cookieParser());
 
 app.use('/node_modules/', express.static(__dirname + '/node_modules/'));
 app.use('/public/', express.static(__dirname + '/public'));
-app.use('/page/', express.static(__dirname + '/app/css/'));
-
 
 app.use('/', index);
+app.use('/view_post', view_post);
 //app.use('/page/:number', index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-    var err = new Error('Not Found');
+/*    var err = new Error('Not Found');
     err.status = 404;
-    next(err);
+    next(err);*/
+    res.status(404).render('404.html');
 });
 
 var server = app.listen(3007, function() {

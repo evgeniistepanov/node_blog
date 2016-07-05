@@ -4,7 +4,7 @@ var posts = require('../json/posts.json');
 var mysql = require('mysql');
 var Q = require('Q');
 
-var connection = null;
+var connection;
 
 function connectToMySQL() {
     connection = mysql.createConnection({
@@ -16,88 +16,124 @@ function connectToMySQL() {
     connection.connect();
 }
 
-
 var mainModel = require('../models/main.js');
 
 var paginationConfig = {
-    postsPerPage: 10
-};
-
+        postsPerPage: 10,
+        paginationObj: {
+            from: 1,
+            to: 1
+        }
+    },
+    pageNumber,
+    rowCounter;
 
 router.get('/', function(req, res, next) {
     connectToMySQL();
+    pageNumber = 1;
 
-    connection.query('SELECT * FROM post LIMIT 10', function(err, results) {
-        console.log(err, results);
-        var pageData = {};
-        pageData.posts = results;
-        res.locals.page = null;
-
-        connection.end();
-
-        res.render('main.html', pageData);
+    countSkipRows();
+    countRows().then(function (results) {
+        rowCounter = results[0][0].rowCounter;
+        changePaginationObj();
+        query();
     });
+
+    function query() {
+        connection.query('SELECT * FROM post LIMIT ' + paginationConfig.postsPerPage, function(err, results) {
+            var pageData = {
+                posts: results,
+                page: pageNumber,
+                rowCounter: rowCounter,
+                paginationObj: paginationConfig.paginationObj
+            };
+
+            res.render('main.html', pageData);
+            connection.end();
+        });
+    }
+
 });
 
 router.get('/page/:number', function(req, res, next) {
-    var pageNumber = +req.params.number,
-        rowCounter;
+    pageNumber = +req.params.number;
 
     connectToMySQL();
     countSkipRows();
 
     countRows().then(function (results) {
         rowCounter = results[0][0].rowCounter;
-        query();
+        changePaginationObj();
+        if (!checkPageNumber()) {
+            res.status(404).render('404.html');
+        } else {
+            query();
+        }
     });
 
-    function countSkipRows() {
-        if (pageNumber > 1) {
-            paginationConfig.skip = paginationConfig.postsPerPage * pageNumber;
-        } else {
-            paginationConfig.skip = 0;
+    function checkPageNumber() {
+        var check = true;
+        if (isNaN(pageNumber)) {
+            check = false;
+        } else if (paginationConfig.paginationObj.to < pageNumber || pageNumber <= 0) {
+            check = false;
         }
-    }
-
-    function countRows(){
-        var defered = Q.defer(),
-            sql = 'SELECT COUNT(*) AS rowCounter FROM post';
-        connection.query(sql,defered.makeNodeResolver());
-        return defered.promise;
+        return check;
     }
 
     function query() {
         var sql = 'SELECT * FROM post LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
         connection.query(sql, function(err, results) {
-            console.log(err, results);
-            var pageData = {};
-            pageData.posts = results;
-            pageData.page = pageNumber;
-            pageData.rowCounter = rowCounter;
-            pageData.paginationObj = createPaginationObj();
-            console.log(pageData.paginationObj);
+            var pageData = {
+                posts: results,
+                page: pageNumber,
+                rowCounter: rowCounter,
+                paginationObj: paginationConfig.paginationObj
+            };
             res.render('main.html', pageData);
             connection.end();
         });
     }
 
-    function createPaginationObj() {
-        var paginationObj = {
-            from: 1,
-            to: 1,
-            currentPage: pageNumber,
-            rowCounter: rowCounter
+});
 
-        };
 
-        paginationObj.to = +(rowCounter/paginationConfig.postsPerPage).toFixed();
-        if (rowCounter % paginationConfig.postsPerPage >= 1 ) {
-            paginationObj.to += 1;
-        }
 
-        return paginationObj;
+function countRows(){
+    var defered = Q.defer(),
+        sql = 'SELECT COUNT(*) AS rowCounter FROM post';
+    connection.query(sql,defered.makeNodeResolver());
+    return defered.promise;
+}
+
+function countSkipRows() {
+    if (pageNumber > 1) {
+        paginationConfig.skip = paginationConfig.postsPerPage * (pageNumber -1);
+    } else {
+        paginationConfig.skip = 0;
+    }
+}
+
+function changePaginationObj() {
+    paginationConfig.paginationObj.currentPage = pageNumber;
+    paginationConfig.paginationObj.rowCounter = rowCounter;
+    paginationConfig.paginationObj.to = +(rowCounter/paginationConfig.postsPerPage).toFixed();
+
+    if (rowCounter % paginationConfig.postsPerPage >= 1 ) {
+        paginationConfig.paginationObj.to += 1;
     }
 
-});
+    if (pageNumber !== 1 ) {
+        paginationConfig.paginationObj.prevPage = pageNumber - 1;
+    } else {
+        paginationConfig.paginationObj.prevPage = 0;
+    }
+
+    if (pageNumber !== paginationConfig.paginationObj.to ) {
+        paginationConfig.paginationObj.nextPage = pageNumber + 1;
+    } else {
+        paginationConfig.paginationObj.nextPage = 0;
+    }
+}
 
 module.exports = router;
