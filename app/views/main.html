@@ -23,15 +23,16 @@
                 <%= page %>
                 <%= rowCounter %>
                 <% } %>
-                <small>Secondary Text</small>
             </h1>
 
             <% posts.forEach(function(post){ %>
             <h2><a href="#"><%= post.title %> <%= post.post_id %> </a></h2>
-            <p class="lead">by <a href="index.php"><%= post.author %></a></p>
+            <p class="lead">by <a href="index.php"><%= post.author_name %></a></p>
+            <hr>
             <p><span class="glyphicon glyphicon-time"></span> Posted on <%= post.date %></p>
+            <hr>
             <%- post.content %>
-            <a class="btn btn-primary" href="/post?id=<%= post.post_id %>">Read More
+            <a class="btn btn-primary" href="/view_post/<%= post.post_id %>">Read More
                 <span class="glyphicon glyphicon-chevron-right"></span></a>
             <hr>
             <% }) %>

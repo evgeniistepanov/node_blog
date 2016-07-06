@@ -25,14 +25,16 @@ var paginationConfig = {
             to: 1
         }
     },
-    pageNumber,
+    pageNumber = 1,
     rowCounter;
+
+
+//SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT 10
 
 router.get('/', function(req, res, next) {
     connectToMySQL();
-    pageNumber = 1;
-
     countSkipRows();
+
     countRows().then(function (results) {
         rowCounter = results[0][0].rowCounter;
         changePaginationObj();
@@ -40,7 +42,9 @@ router.get('/', function(req, res, next) {
     });
 
     function query() {
-        connection.query('SELECT * FROM post LIMIT ' + paginationConfig.postsPerPage, function(err, results) {
+        var sql = 'SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.postsPerPage;
+        connection.query(sql, function(err, results) {
+            makePostsPreview(results);
             var pageData = {
                 posts: results,
                 page: pageNumber,
@@ -71,6 +75,7 @@ router.get('/page/:number', function(req, res, next) {
         }
     });
 
+
     function checkPageNumber() {
         var check = true;
         if (isNaN(pageNumber)) {
@@ -82,14 +87,17 @@ router.get('/page/:number', function(req, res, next) {
     }
 
     function query() {
-        var sql = 'SELECT * FROM post LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
+        //var sql = 'SELECT * FROM post ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
+        var sql = 'SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
         connection.query(sql, function(err, results) {
+            makePostsPreview(results);
             var pageData = {
                 posts: results,
                 page: pageNumber,
                 rowCounter: rowCounter,
                 paginationObj: paginationConfig.paginationObj
             };
+
             res.render('main.html', pageData);
             connection.end();
         });
@@ -119,7 +127,7 @@ function changePaginationObj() {
     paginationConfig.paginationObj.rowCounter = rowCounter;
     paginationConfig.paginationObj.to = +(rowCounter/paginationConfig.postsPerPage).toFixed();
 
-    if (rowCounter % paginationConfig.postsPerPage >= 1 ) {
+    if (rowCounter % paginationConfig.postsPerPage > 0 ) {
         paginationConfig.paginationObj.to += 1;
     }
 
@@ -134,6 +142,15 @@ function changePaginationObj() {
     } else {
         paginationConfig.paginationObj.nextPage = 0;
     }
+}
+
+function makePostsPreview(posts) {
+    posts.forEach(function (item) {
+        var index = item.content.indexOf('<!--preview-->')
+        if (index !== -1) {
+            item.content = item.content.slice(0, index);
+        }
+    });
 }
 
 module.exports = router;
