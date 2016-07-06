@@ -3,6 +3,8 @@ var router = express.Router();
 var posts = require('../json/posts.json');
 var mysql = require('mysql');
 var Q = require('Q');
+var dateUtils = require('../utils/date.js')
+
 
 var connection;
 
@@ -52,13 +54,13 @@ router.get('/:id', function(req, res, next) {
     function query() {
         var sql = 'SELECT * FROM post LEFT JOIN author USING (author_id) WHERE post_id = ' + req.params.id;
         connection.query(sql, function(err, results) {
-            console.log(err, results);
-
             var pageData = {
                 author: results[0].author_name,
                 title: results[0].title,
-                content: results[0].content
+                content: results[0].content,
+                date: dateUtils.convertToDayMonthYear(results[0].date)
             };
+
             res.render('view_post.html', pageData);
             connection.end();
         });
