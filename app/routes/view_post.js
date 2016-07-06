@@ -18,10 +18,9 @@ function connectToMySQL() {
     connection.connect();
 }
 
-/*
 router.get('/', function(req, res, next) {
     connectToMySQL();
- for (var i = 0; i <= 51; i++) {
+ /*for (var i = 0; i <= 51; i++) {
     var content = '<p class="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus, vero, obcaecati, aut, error quam sapiente nemo saepe quibusdam sit excepturi nam quia corporis eligendi eos magni recusandae laborum minus inventore?</p>' +
               '<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ut, tenetur natus doloremque laborum quos iste ipsum rerum obcaecati impedit odit illo dolorum ab tempora nihil dicta earum fugiat. Temporibus, voluptatibus.</p>' +
               '<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ut, tenetur natus doloremque laborum quos iste ipsum rerum obcaecati impedit odit illo dolorum ab tempora nihil dicta earum fugiat. Temporibus, voluptatibus.</p>' +
@@ -37,12 +36,16 @@ router.get('/', function(req, res, next) {
     }
 
     for (var i = 0; i <= 51; i++) {
-        var content = 'Test post ' + i;
 
         connection.query('UPDATE post SET author_id = ? WHERE post_id = ?', [1, i]);
-    }
+    }*/
 
-});*/
+/*    for (var i = 0; i <= 51; i++) {
+
+        connection.query('UPDATE post SET post_category_id = ? WHERE post_id = ?', [4, i]);
+    }*/
+
+});
 
 
 router.get('/:id', function(req, res, next) {

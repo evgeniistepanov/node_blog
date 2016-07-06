@@ -29,8 +29,6 @@ var paginationConfig = {
     rowCounter;
 
 
-//SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT 10
-
 router.get('/', function(req, res, next) {
     connectToMySQL();
     countSkipRows();
@@ -60,14 +58,17 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/page/:number', function(req, res, next) {
+    var categoriesData;
     pageNumber = +req.params.number;
 
     connectToMySQL();
     countSkipRows();
 
-    countRows().then(function (results) {
-        rowCounter = results[0][0].rowCounter;
+    Q.all([countRows(),getCategories()]).then(function(results){
+        rowCounter = results[0][0][0].rowCounter;
+        categoriesData = results[1][0];
         changePaginationObj();
+        
         if (!checkPageNumber()) {
             res.status(404).render('404.html');
         } else {
@@ -101,6 +102,13 @@ router.get('/page/:number', function(req, res, next) {
             res.render('main.html', pageData);
             connection.end();
         });
+    }
+
+    function getCategories() {
+        var defered = Q.defer(),
+            sql = 'SELECT * FROM category';
+        connection.query(sql,defered.makeNodeResolver());
+        return defered.promise;
     }
 
 });
