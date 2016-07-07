@@ -71,6 +71,11 @@ router.get('/page/:number', function(req, res, next) {
     });
 
 
+/*    SELECT * FROM post p
+    JOIN post_category pc ON p.post_id=pc.post_id
+    JOIN category c ON c.category_id=pc.category_id
+    WHERE c.category_name='web-development'*/
+
     function checkPageNumber() {
         var check = true;
         if (isNaN(pageNumber)) {

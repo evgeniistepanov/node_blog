@@ -24,10 +24,17 @@
                 <%= rowCounter %>
                 <% } %>
             </h1>
-
             <% posts.forEach(function(post){ %>
             <h2><a href="#"><%= post.title %></a></h2>
-            <p class="lead">by <a href="index.php"><%= post.author_name %></a></p>
+            <p class="lead">by <a href="index.php"><%= post.author_name %></a>
+                <% if (post.categories) { %>
+                <span style="font-size: 0.7em;"> in categories:
+                    <% post.categories.forEach(function(category, index, arr){ %>
+                    <a href="#"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
+                    <% }) %>
+                </span>
+                <% } %>
+            </p>
             <hr>
             <p><span class="glyphicon glyphicon-time"></span> Posted on <%= post.date %></p>
             <hr>
@@ -36,26 +43,13 @@
                 <span class="glyphicon glyphicon-chevron-right"></span></a>
             <hr>
             <% }) %>
-
-            <!-- Pager -->
-            <ul class="pager">
-                <li class="previous">
-                    <a href="#">&larr; Older</a>
-                </li>
-                <li class="next">
-                    <a href="#">Newer &rarr;</a>
-                </li>
-            </ul>
-
         </div>
-
         <!-- Blog Sidebar Widgets Column -->
         <div class="col-md-4">
             <% include includes/search.html %>
             <% include includes/categories.html %>
             <% include includes/side_widget_well.html %>
         </div>
-
     </div>
     <!-- /.row -->
 

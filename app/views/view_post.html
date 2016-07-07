@@ -18,7 +18,15 @@
         <!-- Blog Entries Column -->
         <div class="col-lg-8">
             <h1><%= title %></h1>
-            <p class="lead">by <a href="#"><%= author %></a></p>
+            <p class="lead">by <a href="#"><%= author %></a>
+                <% if (postCategories.length > 0) { %>
+                <span style="font-size: 0.7em;"> in categories:
+                    <% postCategories.forEach(function(category, index, arr){ %>
+                    <a href="#"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
+                    <% }) %>
+                </span>
+                <% } %>
+            </p>
             <hr>
             <p><span class="glyphicon glyphicon-time"></span> Posted on <%= date %></p>
             <hr>
