@@ -7,9 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <title>Blog Home - Start Bootstrap Template</title>
-    <!--<link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">-->
     <link href="/node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-    <!--<link href="/public/css/blog-home.css" rel="stylesheet">-->
     <link href="/public/css/blog-home.css" rel="stylesheet">
 
 </head>
@@ -28,12 +26,12 @@
                 <% } %>
             </h1>
             <% posts.forEach(function(post){ %>
-            <h2><a href="#"><%= post.title %></a></h2>
+            <h2><a href="/view_post/<%= post.post_id %>"><%= post.title %></a></h2>
             <p class="lead">by <a href="index.php"><%= post.author_name %></a>
                 <% if (post.categories) { %>
                 <span style="font-size: 0.7em;"> in categories:
                     <% post.categories.forEach(function(category, index, arr){ %>
-                    <a href="#"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
+                    <a href="/view_category/<%= category.category_name %>"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
                     <% }) %>
                 </span>
                 <% } %>
@@ -58,21 +56,22 @@
 
     <nav>
         <ul class="pagination">
-
             <% if (paginationObj.prevPage === 0) { %>
             <li class="disabled"><span aria-hidden="true">«</span></li>
             <% } else{ %>
-            <li><a href="/page/<%= paginationObj.prevPage %>" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+            <li><a href="<%= paginationObj.pageType %><%= paginationObj.category %>/page/<%= paginationObj.prevPage %>" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
             <% } %>
 
             <% for(var i = paginationObj.from; i <= paginationObj.to; i++) { %>
-            <li class="<% if (i === paginationObj.currentPage) { %><%= 'active' %><% } %>"><a href='/page/<%= i %>'>
+            <li class="<% if (i === paginationObj.currentPage) { %><%= 'active' %><% } %>"><a href='<%= paginationObj.pageType %><%= paginationObj.category %>/page/<%= i %>'>
             <%= i %></a></li><% } %>
 
             <% if (paginationObj.nextPage === 0) { %>
             <li class="disabled"><span aria-hidden="true">»</span></li>
             <% } else{ %>
-            <li><a href="/page/<%= paginationObj.nextPage %>" aria-label="Next"><span aria-hidden="true">»</span></a></li>
+            <li><a href="<%= paginationObj.pageType %><%= paginationObj.category %>/page/<%= paginationObj.nextPage %>" aria-label="Next">
+                <span aria-hidden="true">»</span>
+            </a></li>
             <% } %>
         </ul>
     </nav>

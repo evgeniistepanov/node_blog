@@ -6,14 +6,11 @@ var BaseModel = {
     mysql: mysql,
     Q: Q,
     connection: null,
-    createConnection: function(){
+    createConnection: function () {
         this.connection = this.mysql.createConnection(Config.mysqlConfig);
     },
-/*    connect: function(){
-        this.connection.connect();
-    },*/
-    testQuery: function(sql){
-        this.connection.query(sql, function(err, res){
+    testQuery: function (sql) {
+        this.connection.query(sql, function (err, res) {
             console.log(err, res);
         });
     }

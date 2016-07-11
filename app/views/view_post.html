@@ -22,7 +22,7 @@
                 <% if (postCategories.length > 0) { %>
                 <span style="font-size: 0.7em;"> in categories:
                     <% postCategories.forEach(function(category, index, arr){ %>
-                    <a href="#"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
+                    <a href="/view_category/<%= category.category_name %>"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
                     <% }) %>
                 </span>
                 <% } %>

@@ -1,78 +1,81 @@
 var express = require('express');
 var router = express.Router();
 var posts = require('../json/posts.json');
-var mysql = require('mysql');
 var Q = require('Q');
 var _ = require('lodash');
+var Config = require('../config/config.js');
 
 var mainUtils = require('../utils/main_utils.js');
 var dateUtils = require('../utils/date.js');
 
-var connection;
-var mainModel = require('../models/main.js');
+var PostsModel = require('../models/posts.js');
 
 var paginationConfig = {
-        postsPerPage: 10,
-        paginationObj: {
-            from: 1,
-            to: 1
-        }
-    };
+    postsPerPage: 10,
+    paginationObj: {
+        from: 1,
+        to: 1,
+        pageType: ''
+    }
+};
 
-var pageNumber = 1,
+var pageNumber,
     rowCounter,
     categoriesData,
     postCategories;
 
-router.get('/', function(req, res, next) {
-    connectToMySQL();
+router.get('/', function (req, res, next) {
+    pageNumber = 1;
     countSkipRows();
 
-    Q.all([countRows(),getCategories()]).then(function(results){
+    PostsModel.createConnection();
+    PostsModel.connection.connect();
+
+    Q.all([PostsModel.countPosts(), PostsModel.getCategories()]).then(function (results) {
         rowCounter = results[0][0][0].rowCounter;
         categoriesData = results[1][0];
-        //postCategories = results[2][0];
 
-        getPostsCategories().then(function (results) {
+        PostsModel.getPostsCategories().then(function (results) {
             postCategories = results[0];
-            console.log(results);
             changePaginationObj();
-            query();
+
+            PostsModel.getPostsWithAuthors(paginationConfig)
+                .then(function (results) {
+                    res.render('main.html', preparePostsForRender(results[0]));
+                    PostsModel.connection.end();
+                });
         });
     });
-
-    function query() {
-        var sql = 'SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.postsPerPage;
-        connection.query(sql, function(err, results) {
-            res.render('main.html', preparePostsForRender(results));
-            connection.end();
-        });
-    }
-
 });
 
-router.get('/page/:number', function(req, res, next) {
-
+router.get('/page/:number', function (req, res, next) {
     pageNumber = +req.params.number;
-
-    connectToMySQL();
     countSkipRows();
 
-    Q.all([countRows(),getCategories()]).then(function(results){
+    PostsModel.createConnection();
+    PostsModel.connection.connect();
+
+    Q.all([PostsModel.countPosts(), PostsModel.getCategories()]).then(function (results) {
         rowCounter = results[0][0][0].rowCounter;
         categoriesData = results[1][0];
 
-        getPostsCategories().then(function (results) {
-            postCategories = results[0];
-            console.log(results);
-            changePaginationObj();
+        PostsModel.getPostsCategories().then(function (results) {
+                postCategories = results[0];
+                changePaginationObj();
 
-            if (!checkPageNumber()) {
-                res.status(404).render('404.html');
-            } else {
-                query();
+                if (!checkPageNumber()) {
+                    res.redirect('/404');
+                    PostsModel.connection.end();
+                    return;
+                }
+
+                PostsModel.getPostsWithAuthors(paginationConfig)
+                    .then(function (results) {
+                        res.render('main.html', preparePostsForRender(results[0]));
+                        PostsModel.connection.end();
+                    });
             }
-        });
+        );
     });
 
     function checkPageNumber() {
@@ -84,38 +87,11 @@ router.get('/page/:number', function(req, res, next) {
         }
         return check;
     }
-
-    function query() {
-        var sql = 'SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
-        connection.query(sql, function(err, results) {
-            res.render('main.html', preparePostsForRender(results));
-            connection.end();
-        });
-    }
-
 });
-
-
-function connectToMySQL() {
-    connection = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'root',
-        password : '',
-        database : 'node_blog'
-    });
-    connection.connect();
-}
-
-function countRows(){
-    var defered = Q.defer(),
-        sql = 'SELECT COUNT(*) AS rowCounter FROM post';
-    connection.query(sql,defered.makeNodeResolver());
-    return defered.promise;
-}
 
 function countSkipRows() {
     if (pageNumber > 1) {
-        paginationConfig.skip = paginationConfig.postsPerPage * (pageNumber -1);
+        paginationConfig.skip = paginationConfig.postsPerPage * (pageNumber - 1);
     } else {
         paginationConfig.skip = 0;
     }
@@ -124,13 +100,13 @@ function countSkipRows() {
 function changePaginationObj() {
     paginationConfig.paginationObj.currentPage = pageNumber;
     paginationConfig.paginationObj.rowCounter = rowCounter;
-    paginationConfig.paginationObj.to = +(rowCounter/paginationConfig.postsPerPage).toFixed();
+    paginationConfig.paginationObj.to = +(rowCounter / paginationConfig.postsPerPage).toFixed();
 
     if (rowCounter % paginationConfig.postsPerPage > 0) {
         paginationConfig.paginationObj.to += 1;
     }
 
-    if (pageNumber !== 1 ) {
+    if (pageNumber !== 1) {
         paginationConfig.paginationObj.prevPage = pageNumber - 1;
     } else {
         paginationConfig.paginationObj.prevPage = 0;
@@ -143,23 +119,9 @@ function changePaginationObj() {
     }
 }
 
-function getCategories() {
-    var defered = Q.defer(),
-        sql = 'SELECT * FROM category';
-    connection.query(sql,defered.makeNodeResolver());
-    return defered.promise;
-}
-
-function getPostsCategories() {
-    var defered = Q.defer(),
-        sql = 'SELECT * FROM post_category';
-    connection.query(sql,defered.makeNodeResolver());
-    return defered.promise;
-}
-
 function makePostsPreview(posts) {
     posts.forEach(function (item) {
-        var index = item.content.indexOf('<!--preview-->')
+        var index = item.content.indexOf(Config.previewTag);
         if (index !== -1) {
             item.content = item.content.slice(0, index);
         }
@@ -177,13 +139,18 @@ function preparePostsForRender(results) {
         categoriesSidebar: mainUtils.sliceCategories(categoriesData)
     };
 
-    postsData.posts.forEach(function(item){
+    postsData.posts.forEach(function (item) {
         item.date = dateUtils.convertToDayMonthYear(item.date)
     });
 
+    addCategoriesToPosts(postsData);
 
+    return postsData;
+}
+
+function addCategoriesToPosts(postsData) {
     var obj = {};
-    postCategories.forEach(function(item){
+    postCategories.forEach(function (item) {
         var category_obj = {};
         if (Array.isArray(obj[item.post_id])) {
             category_obj.category_name = _.find(categoriesData, {category_id: item.category_id}).category_name;
@@ -197,13 +164,11 @@ function preparePostsForRender(results) {
         }
     });
 
-    postsData.posts.forEach(function(item){
+    postsData.posts.forEach(function (item) {
         if (obj[item.post_id]) {
             item.categories = obj[item.post_id];
         }
     });
-
-    return postsData;
 }
 
 module.exports = router;

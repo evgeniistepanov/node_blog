@@ -10,15 +10,15 @@ var connection;
 
 function connectToMySQL() {
     connection = mysql.createConnection({
-        host     : 'localhost',
-        user     : 'root',
-        password : '',
-        database : 'node_blog'
+        host: 'localhost',
+        user: 'root',
+        password: '',
+        database: 'node_blog'
     });
     connection.connect();
 }
 
-router.get('/', function(req, res, next) {
+router.get('/', function (req, res, next) {
     var categoriesData;
 
     connectToMySQL();
@@ -27,12 +27,13 @@ router.get('/', function(req, res, next) {
         .then(function (results) {
             categoriesData = results[0];
             res.render('page_404.html', preparePageData())
+            connection.end();
         });
 
     function getCategories() {
         var defered = Q.defer(),
             sql = 'SELECT * FROM category';
-        connection.query(sql,defered.makeNodeResolver());
+        connection.query(sql, defered.makeNodeResolver());
         return defered.promise;
     }
 
