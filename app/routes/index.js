@@ -61,15 +61,19 @@ router.get('/page/:number', function(req, res, next) {
     Q.all([countRows(),getCategories()]).then(function(results){
         rowCounter = results[0][0][0].rowCounter;
         categoriesData = results[1][0];
-        changePaginationObj();
-        
-        if (!checkPageNumber()) {
-            res.status(404).render('404.html');
-        } else {
-            query();
-        }
-    });
 
+        getPostsCategories().then(function (results) {
+            postCategories = results[0];
+            console.log(results);
+            changePaginationObj();
+
+            if (!checkPageNumber()) {
+                res.status(404).render('404.html');
+            } else {
+                query();
+            }
+        });
+    });
 
     function checkPageNumber() {
         var check = true;

@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var posts = require('../json/posts.json');
 var mysql = require('mysql');
 var Q = require('Q');
 var _ = require('lodash');
@@ -9,7 +8,7 @@ var mainUtils = require('../utils/main_utils.js');
 var dateUtils = require('../utils/date.js');
 
 var connection;
-var mainModel = require('../models/main.js');
+var CategoryModel = require('../models/categories.js');
 
 var paginationConfig = {
         postsPerPage: 10,
@@ -22,16 +21,18 @@ var paginationConfig = {
 var pageNumber = 1,
     rowCounter,
     categoriesData,
-    postCategories;
+    postCategories,
+    categoryName;
 
-router.get('/', function(req, res, next) {
+router.get('/:category', function(req, res, next) {
     connectToMySQL();
     countSkipRows();
+    categoryName = connection.escape(req.params.category);
+
 
     Q.all([countRows(),getCategories()]).then(function(results){
         rowCounter = results[0][0][0].rowCounter;
         categoriesData = results[1][0];
-        //postCategories = results[2][0];
 
         getPostsCategories().then(function (results) {
             postCategories = results[0];
@@ -42,7 +43,13 @@ router.get('/', function(req, res, next) {
     });
 
     function query() {
-        var sql = 'SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.postsPerPage;
+        var sql = 'SELECT * FROM post' +
+        ' JOIN post_category ON post.post_id = post_category.post_id' +
+        ' JOIN category ON category.category_id= post_category.category_id' +
+        ' LEFT JOIN author USING (author_id)' +
+        ' WHERE category.category_name=' + categoryName +
+        ' ORDER BY post.post_id DESC LIMIT ' + paginationConfig.postsPerPage;
+
         connection.query(sql, function(err, results) {
             res.render('main.html', preparePostsForRender(results));
             connection.end();
@@ -51,30 +58,68 @@ router.get('/', function(req, res, next) {
 
 });
 
-router.get('/page/:number', function(req, res, next) {
-
+router.get('/:category/page/:number', function(req, res, next) {
     pageNumber = +req.params.number;
-
-    connectToMySQL();
+    categoryName = req.params.category;
+    //connectToMySQL();
     countSkipRows();
+
+    CategoryModel.createConnection();
+    CategoryModel.connection.connect();
+
+    //ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
+
+    Q.all([CategoryModel.countPostsWithCategory(categoryName), CategoryModel.getCategories()])
+        .then(function(results) {
+            rowCounter = results[0][0][0].rowCounter;
+            categoriesData = results[1][0];
+
+            if (!_.find(categoriesData, {category_name: categoryName})) {
+                res.redirect('/404');
+            }
+
+            CategoryModel.getPostsCategories()
+                .then(function(results){
+                    postCategories = results[0];
+                    changePaginationObj();
+
+                    if (!checkPageNumber()) {
+                        res.redirect('/404');
+                    } else {
+                        CategoryModel.getPostsWithCategory(categoryName)
+                            .then(function(results){
+                                res.render('main.html', preparePostsForRender(results[0]));
+                                CategoryModel.connection.end();
+                            });
+                    }
+                });
+        })
+        .catch(function(error){
+            console.log(error);
+        });
+
+    /*
+
+    categoryName = connection.escape(req.params.category);
 
     Q.all([countRows(),getCategories()]).then(function(results){
         rowCounter = results[0][0][0].rowCounter;
         categoriesData = results[1][0];
-        changePaginationObj();
-        
-        if (!checkPageNumber()) {
-            res.status(404).render('404.html');
-        } else {
-            query();
-        }
+
+        getPostsCategories().then(function (results) {
+            postCategories = results[0];
+            changePaginationObj();
+
+            if (!checkPageNumber()) {
+                res.status(404).render('404.html');
+            } else {
+                query();
+            }
+        });
     });
 
 
-/*    SELECT * FROM post p
-    JOIN post_category pc ON p.post_id=pc.post_id
-    JOIN category c ON c.category_id=pc.category_id
-    WHERE c.category_name='web-development'*/
+    }*/
 
     function checkPageNumber() {
         var check = true;
@@ -86,13 +131,6 @@ router.get('/page/:number', function(req, res, next) {
         return check;
     }
 
-    function query() {
-        var sql = 'SELECT * FROM post LEFT JOIN author USING (author_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
-        connection.query(sql, function(err, results) {
-            res.render('main.html', preparePostsForRender(results));
-            connection.end();
-        });
-    }
 
 });
 
@@ -109,7 +147,11 @@ function connectToMySQL() {
 
 function countRows(){
     var defered = Q.defer(),
-        sql = 'SELECT COUNT(*) AS rowCounter FROM post';
+     sql =  'SELECT COUNT(*) AS rowCounter FROM post' +
+        ' JOIN post_category ON post.post_id = post_category.post_id' +
+        ' JOIN category ON category.category_id= post_category.category_id' +
+        ' WHERE category.category_name=' + categoryName;
+
     connection.query(sql,defered.makeNodeResolver());
     return defered.promise;
 }
