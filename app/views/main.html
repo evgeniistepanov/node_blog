@@ -27,7 +27,7 @@
             </h1>
             <% posts.forEach(function(post){ %>
             <h2><a href="/view_post/<%= post.post_id %>"><%= post.title %></a></h2>
-            <p class="lead">by <a href="view_user/<%= post.user_name %>"><%= post.user_name %></a>
+            <p class="lead">by <a href="/view_user/<%= post.user_name %>"><%= post.user_name %></a>
                 <% if (post.categories) { %>
                 <span class="in-categories"> in categories:
                     <% post.categories.forEach(function(category, index, arr){ %>

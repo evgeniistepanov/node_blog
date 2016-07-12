@@ -9,6 +9,7 @@ var view_post = require('./app/routes/view_post');
 var view_category = require('./app/routes/view_category');
 var view_user = require('./app/routes/view_user');
 var page_404 = require('./app/routes/page_404');
+var admin = require('./app/routes/admin/index');
 
 var app = express();
 
@@ -32,6 +33,9 @@ app.use('/', index);
 app.use('/view_post', view_post);
 app.use('/view_category', view_category);
 app.use('/view_user', view_user);
+
+app.use('/admin', admin);
+
 app.use('/404', page_404);
 //app.use('/page/:number', index);
 
