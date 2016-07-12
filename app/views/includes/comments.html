@@ -1,0 +1,15 @@
+<% if (postComments.length > 0) { %>
+<% postComments.forEach(function(comment){ %>
+<div class="media">
+    <a class="pull-left" href="#">
+        <img class="media-object" height="64px" src="<%= comment.avatar_url %>" alt="">
+    </a>
+    <div class="media-body">
+        <h4 class="media-heading">
+            <small><a href="/view_user/<%= comment.user_name %>" style="font-weight: bold;"><%= comment.user_name %></a> <%= comment.date %></small>
+        </h4>
+       <%= comment.comment_content %>
+    </div>
+</div>
+<% }) %>
+<% } %>

@@ -7,9 +7,11 @@ var dateUtils = require('../utils/date.js')
 var mainUtils = require('../utils/main_utils.js')
 
 var PostsModel = require('../models/posts.js');
+var CommentsModel = require('../models/comments.js');
 
 var categoriesData,
-    postCategories = [];
+    postCategories = [],
+    postComments = [];
 
 router.get('/', function (req, res, next) {
     connectToMySQL();
@@ -45,13 +47,16 @@ router.get('/:id', function (req, res, next) {
 
     PostsModel.createConnection();
     PostsModel.connection.connect();
+    CommentsModel.setConnection(PostsModel.connection);
 
-    Q.all([PostsModel.getCategories(), PostsModel.getSinglePostCategories(id)])
+    Q.all([PostsModel.getCategories(), PostsModel.getSinglePostCategories(id), CommentsModel.getCommentsForPost(id)])
         .then(function (results) {
             categoriesData = results[0][0];
             postCategories = results[1][0];
+            postComments = results[2][0];
             PostsModel.getSinglePost(id)
                 .then(function (results) {
+                    
                     if (results[0].length === 0) {
                         res.redirect('/404');
                         PostsModel.connection.end();
@@ -65,13 +70,18 @@ router.get('/:id', function (req, res, next) {
 
     function prepareSinglePostForRender(results) {
         var postData = {
-            author: results[0].author_name,
+            user: results[0].user_name,
             title: results[0].title,
             content: results[0].content,
             date: dateUtils.convertToDayMonthYear(results[0].date),
             postCategories: postCategories,
+            postComments: postComments,
             categoriesSidebar: mainUtils.sliceCategories(categoriesData)
         };
+
+        postData.postComments.forEach(function (item) {
+            item.date = dateUtils.convertToDayMonthYear(item.date)
+        });
 
         return postData;
     }

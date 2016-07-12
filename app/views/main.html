@@ -27,9 +27,9 @@
             </h1>
             <% posts.forEach(function(post){ %>
             <h2><a href="/view_post/<%= post.post_id %>"><%= post.title %></a></h2>
-            <p class="lead">by <a href="index.php"><%= post.author_name %></a>
+            <p class="lead">by <a href="view_user/<%= post.user_name %>"><%= post.user_name %></a>
                 <% if (post.categories) { %>
-                <span style="font-size: 0.7em;"> in categories:
+                <span class="in-categories"> in categories:
                     <% post.categories.forEach(function(category, index, arr){ %>
                     <a href="/view_category/<%= category.category_name %>"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
                     <% }) %>
@@ -42,6 +42,9 @@
             <%- post.content %>
             <a class="btn btn-primary" href="/view_post/<%= post.post_id %>">Read More
                 <span class="glyphicon glyphicon-chevron-right"></span></a>
+            <% if (post.comments_counter > 0) { %>
+            <span class="comments-counter"><%= post.comments_counter %> Comment<%if (post.comments_counter >1) { %>s <% } %></span>
+            <% } %>
             <hr>
             <% }) %>
         </div>

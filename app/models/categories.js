@@ -6,7 +6,7 @@ PostCategories.getPostsWithCategory = function (category, paginationConfig) {
         sql = 'SELECT * FROM post' +
             ' JOIN post_category ON post.post_id = post_category.post_id' +
             ' JOIN category ON category.category_id= post_category.category_id' +
-            ' LEFT JOIN author USING (author_id)' +
+            ' LEFT JOIN user USING (user_id)' +
             ' WHERE category.category_name= ' + this.connection.escape(category) +
             ' ORDER BY post.post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
     this.connection.query(sql, defered.makeNodeResolver());

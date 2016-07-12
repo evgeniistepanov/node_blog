@@ -39,7 +39,7 @@ router.get('/', function (req, res, next) {
             postCategories = results[0];
             changePaginationObj();
 
-            PostsModel.getPostsWithAuthors(paginationConfig)
+            PostsModel.getPostsWithUsers(paginationConfig)
                 .then(function (results) {
                     res.render('main.html', preparePostsForRender(results[0]));
                     PostsModel.connection.end();
@@ -69,7 +69,7 @@ router.get('/page/:number', function (req, res, next) {
                     return;
                 }
 
-                PostsModel.getPostsWithAuthors(paginationConfig)
+                PostsModel.getPostsWithUsers(paginationConfig)
                     .then(function (results) {
                         res.render('main.html', preparePostsForRender(results[0]));
                         PostsModel.connection.end();

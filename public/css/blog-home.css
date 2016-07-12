@@ -5,3 +5,11 @@ body {
 footer {
     margin: 50px 0;
 }
+
+.comments-counter {
+    color: #337ab7; padding-left: 10px;
+}
+
+.in-categories {
+    font-size: 0.7em;
+}

@@ -13,6 +13,9 @@ var BaseModel = {
         this.connection.query(sql, function (err, res) {
             console.log(err, res);
         });
+    },
+    setConnection: function (connection) {
+        this.connection = connection;
     }
 };
 

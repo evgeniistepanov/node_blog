@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>Test post 123</title>
+    <title><%= title %></title>
     <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
     <link href="/public/css/blog-home.css" rel="stylesheet">
 </head>
@@ -18,7 +18,7 @@
         <!-- Blog Entries Column -->
         <div class="col-lg-8">
             <h1><%= title %></h1>
-            <p class="lead">by <a href="#"><%= author %></a>
+            <p class="lead">by <a href="/view_user/<%= user %>"><%= user %></a>
                 <% if (postCategories.length > 0) { %>
                 <span style="font-size: 0.7em;"> in categories:
                     <% postCategories.forEach(function(category, index, arr){ %>
@@ -42,6 +42,7 @@
                 </form>
             </div>
             <hr>
+            <% include includes/comments.html %>
         </div>
         <!-- Blog Sidebar Widgets Column -->
         <div class="col-md-4">

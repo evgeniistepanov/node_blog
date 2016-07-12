@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title></title>
+    <link href="../node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="/public/css/blog-home.css" rel="stylesheet">
+</head>
+<body>
+<% include includes/nav.html %>
+<!-- Page Content -->
+<div class="container">
+    <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-lg-8">
+
+            <div class="row">
+                <div class="col-lg-9">
+                    <p><img src="<%= userData.avatar_url %>" width="160" height="160"></p>
+                    <h1><%= userData.user_name %></h1>
+                    <br>
+                    <div class="row">
+                        <div class="span6">
+                            <table class="table table-striped">
+                                <tr>
+                                    <td><h6>User role:</h6></td>
+                                    <td><i class="icon-headphones"></i>User</td>
+                                </tr>
+                                <tr>
+                                    <td><h6>Registration Date:</h6></td>
+                                    <td><i class="icon-headphones"></i><%= userData.registration_date %></td>
+                                </tr>
+                                <tr>
+                                    <td><h6>Cell Phone:</h6></td>
+                                    <td><i class="icon-headphones"></i><%= userData.phone %></td>
+                                </tr>
+                                <tr>
+                                    <td><h6>Email:</h6></td>
+                                    <td><i class="icon-envelope"></i> <a href="mailto:<%= userData.email %>"><%= userData.email %></a></td>
+                                </tr>
+                                <tr>
+                                    <td><h6>Web-site:</h6></td>
+                                    <td><i class="icon-retweet"></i> <a href="<%= userData.web_site %>"><%= userData.web_site %></a></td>
+                                </tr>
+                            </table>
+                            <div class="alert alert-warning">
+                                <h4 class="alert-heading">Warning</h4>
+                                The phone numbers, email addresses, and Twitter handlers are fake.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--<div class="well">
+                <h4>Leave a Comment:</h4>
+                <form role="form">
+                    <div class="form-group">
+                        <textarea class="form-control" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+            <hr>-->
+        </div>
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-4">
+            <% include includes/search.html %>
+            <% include includes/categories.html %>
+            <% include includes/side_widget_well.html %>
+        </div>
+    </div>
+    <!-- /.row -->
+    <% include includes/footer.html %>
+</div>
+<!-- /.container -->
+<script src="/node_modules/jquery/dist/jquery.js"></script>
+<script src="../../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
