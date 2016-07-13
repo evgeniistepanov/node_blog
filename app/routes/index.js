@@ -24,22 +24,35 @@ var pageNumber,
     categoriesData,
     postCategories;
 
+
+
+
+
 router.get('/', function (req, res, next) {
     pageNumber = 1;
-    countSkipRows();
+
+    mainUtils.pagination.currentPage = 1;
+
+    mainUtils.pagination.countSkipRows();
+    //countSkipRows();
 
     PostsModel.createConnection();
     PostsModel.connection.connect();
 
     Q.all([PostsModel.countPosts(), PostsModel.getCategories()]).then(function (results) {
-        rowCounter = results[0][0][0].rowCounter;
+        //rowCounter = results[0][0][0].rowCounter;
+
+        mainUtils.pagination.rowCounter = results[0][0][0].rowCounter;
+
         categoriesData = results[1][0];
 
         PostsModel.getPostsCategories().then(function (results) {
             postCategories = results[0];
-            changePaginationObj();
 
-            PostsModel.getPostsWithUsers(paginationConfig)
+            //changePaginationObj();
+            mainUtils.pagination.changePaginationObj();
+
+            PostsModel.getPostsWithUsers(mainUtils.pagination)
                 .then(function (results) {
                     res.render('main.html', preparePostsForRender(results[0]));
                     PostsModel.connection.end();
@@ -133,9 +146,9 @@ function preparePostsForRender(results) {
 
     var postsData = {
         posts: results,
-        page: pageNumber,
-        rowCounter: rowCounter,
-        paginationObj: paginationConfig.paginationObj,
+        page: mainUtils.pagination.currentPage,
+        rowCounter: mainUtils.pagination.rowCounter,
+        paginationObj: mainUtils.pagination,
         categoriesSidebar: mainUtils.sliceCategories(categoriesData)
     };
 

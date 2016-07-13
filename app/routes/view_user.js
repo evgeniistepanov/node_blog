@@ -32,7 +32,11 @@ router.get('/:username', function (req, res, next) {
             pageData.categoriesSidebar = mainUtils.sliceCategories(pageData.categoriesSidebar);
             pageData.userData = results[1][0][0];
             pageData.userData.registration_date = dateUtils.convertToDayMonthYear(pageData.userData.registration_date);
-            res.render('view_user.html', pageData);
+
+            mainUtils.pagination.countSkipRows();
+
+            //res.render('view_user.html', pageData);
+
             UserModel.connection.end();
         });
 });
