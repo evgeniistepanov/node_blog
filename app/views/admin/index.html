@@ -20,7 +20,7 @@
 
         <div class="col-lg-3 col-md-3 col-sm-4">
             <div class="list-group table-of-contents">
-                <a class="list-group-item active" href="#navbar">Dashboard</a>
+                <a class="list-group-item active" href="/admin">Dashboard</a>
                 <a class="list-group-item" href="/admin/posts">Posts</a>
                 <a class="list-group-item" href="/admin/categories">Categories</a>
                 <a class="list-group-item" href="#tables">Tables</a>
@@ -34,10 +34,6 @@
         </div>
         <!-- Blog Sidebar Widgets Column -->
         <div class="col-md-4">
-            <% include ../includes/search.html %>
-            <% include ../includes/categories.html %>
-            <% include ../includes/side_widget_well.html %>
-
             <div class="panel panel-primary">
                 <div class="panel-heading">
                     <h3 class="panel-title">Statistic</h3>
@@ -46,28 +42,29 @@
                     <table class="table table-striped">
                         <tr>
                             <td>Posts</td>
-                            <td><i class="icon-headphones"></i>52</td>
+                            <td><i class="icon-headphones"></i><%= dataCounter.posts %></td>
                         </tr>
                         <tr>
                             <td>Categories:</td>
-                            <td><i class="icon-envelope"></i> 6</td>
+                            <td><i class="icon-envelope"></i><%= dataCounter.categories %></td>
                         </tr>
                         <tr>
                             <td>Comments</td>
-                            <td><i class="icon-headphones"></i>4</td>
+                            <td><i class="icon-headphones"></i><%= dataCounter.comments %></td>
                         </tr>
                         <tr>
                             <td>Users</td>
-                            <td><i class="icon-headphones"></i>2</td>
+                            <td><i class="icon-headphones"></i><%= dataCounter.users %></td>
                         </tr>
-                        <tr>
-                            <td>Web-site:</td>
-                            <td><i class="icon-retweet"></i> <a href="https://google.com">https://google.com</a></td>
-                        </tr>
-                        </table>
+                    </table>
+                    <canvas id="chart" width="200" height="200"></canvas>
                 </div>
             </div>
+        </div>
 
+        <div class="col-md-4">
+            <% include includes/recent_comment.html %>
+            <% include includes/recent_user.html %>
         </div>
     </div>
     <!-- /.row -->
@@ -76,5 +73,34 @@
 <!-- /.container -->
 <script src="/node_modules/jquery/dist/jquery.js"></script>
 <script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.js"></script>
+
+<script>
+    var ctx = document.getElementById("chart");
+    var chartData = JSON.parse('<%- JSON.stringify(dataForChart) %>');
+    var data = {
+        labels: chartData.labels,
+        datasets: [
+            {
+                data: chartData.counters,
+                backgroundColor: [
+                    "#FF6384",
+                    "#36A2EB",
+                    "#FFCE56",
+                    "#077D0B"
+                ],
+                hoverBackgroundColor: [
+                    "#FF6384",
+                    "#36A2EB",
+                    "#FFCE56",
+                    "#077D0B"
+                ]
+            }]
+    };
+    var myPieChart = new Chart(ctx, {
+        type: 'pie',
+        data: data
+    });
+</script>
 </body>
 </html>

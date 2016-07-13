@@ -11,5 +11,17 @@ User.getUserInfo = function(username) {
     return defered.promise;
 };
 
+User.getLastUser = function() {
+    var defered = this.Q.defer(),
+        sql = 'SELECT * FROM user ORDER BY user_id DESC LIMIT 1';
+    this.connection.query(sql, defered.makeNodeResolver());
+    defered.promise.catch(function (error) {
+        console.log(error);
+    });
+    return defered.promise;
+};
+
+
+
 module.exports = User;
 

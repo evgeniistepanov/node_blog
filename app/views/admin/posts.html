@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Admin panel - Posts</title>
+    <link href="/node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="/public/css/blog-home.css" rel="stylesheet">
+</head>
+<body>
+<!-- Page Content -->
+<% include includes/header_admin.html %>
+
+<!-- Page Content -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-3 col-md-3 col-sm-4">
+            <div class="list-group table-of-contents">
+                <a class="list-group-item active" href="/admin">Dashboard</a>
+                <a class="list-group-item" href="/admin/posts">Posts</a>
+                <a class="list-group-item" href="/admin/categories">Categories</a>
+                <a class="list-group-item" href="#tables">Tables</a>
+                <a class="list-group-item" href="#forms">Forms</a>
+                <a class="list-group-item" href="#navs">Navs</a>
+                <a class="list-group-item" href="#indicators">Indicators</a>
+                <a class="list-group-item" href="#progress-bars">Progress bars</a>
+                <a class="list-group-item" href="#containers">Containers</a>
+                <a class="list-group-item" href="#dialogs">Dialogs</a>
+            </div>
+        </div>
+        <!-- Blog Sidebar Widgets Column -->
+        <div class="col-md-8">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Statistic</h3>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Post ID</th>
+                            <th>Author</th>
+                            <th>Title</th>
+                            <th>Categories</th>
+                            <th>Comments counter</th>
+                            <th>Date</th>
+                        </tr>
+                        </thead>
+                        <% posts.forEach(function(post){ %>
+                        <tr>
+                            <th scope="row"><%=post.post_id %></th>
+                            <td><a href="/view_user/<%= post.user_name %>"><%= post.user_name %></a></td>
+                            <td><a href="/view_post/<%= post.post_id %>"><%= post.title %></a></td>
+                            <% if (post.categories) { %>
+                            <td>
+                                <% post.categories.forEach(function(category, index, arr){ %>
+                                <a href="/view_category/<%= category.category_name %>"><%= category.category_name %></a><% if(index !== arr.length-1){ %>, <% } %>
+                                <% }) %>
+                            </td>
+                            <% } else { %>
+                            <td> </td>
+                            <% } %>
+                            <td><%= post.comments_counter %></td>
+                            <td><%= post.date %></td>
+                        </tr>
+                        <% }) %>
+                    </table>
+                </div>
+            </div>
+
+            <nav>
+                <ul class="pagination">
+                    <% if (paginationObj.prevPage === 0) { %>
+                    <li class="disabled"><span aria-hidden="true">«</span></li>
+                    <% } else{ %>
+                    <li><a href="/admin/posts/<%= paginationObj.prevPage %>" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+                    <% } %>
+
+                    <% for(var i = paginationObj.from; i <= paginationObj.to; i++) { %>
+                    <li class="<% if (i === paginationObj.currentPage) { %><%= 'active' %><% } %>"><a href='/admin/posts/<%= i %>'>
+                        <%= i %></a></li><% } %>
+
+                    <% if (paginationObj.nextPage === 0) { %>
+                    <li class="disabled"><span aria-hidden="true">»</span></li>
+                    <% } else{ %>
+                    <li><a href="/admin/posts/<%= paginationObj.nextPage %>" aria-label="Next">
+                        <span aria-hidden="true">»</span>
+                    </a></li>
+                    <% } %>
+                </ul>
+            </nav>
+
+
+
+        </div>
+    </div>
+    <!-- /.row -->
+    <% include ../includes/footer.html %>
+</div>
+<!-- /.container -->
+<script src="/node_modules/jquery/dist/jquery.js"></script>
+<script src="/node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

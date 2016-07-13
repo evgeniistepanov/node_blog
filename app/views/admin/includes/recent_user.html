@@ -1,0 +1,33 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Recent User</h3>
+    </div>
+    <div class="panel-body">
+        <h2 class="user-header-admin-panel"><a href="/view_user/<%= lastUser.user_name %>"><%= lastUser.user_name %></a></h2>
+        <p><img src="<%= lastUser.avatar_url %>" width="64" height="64"></p>
+        <table class="table table-striped">
+            <tr>
+                <td><h6>User role:</h6></td>
+                <td><i class="icon-headphones"></i>User</td>
+            </tr>
+            <tr>
+                <td><h6>Registration Date:</h6></td>
+                <td><i class="icon-headphones"></i><%= lastUser.registration_date %></td>
+            </tr>
+            <tr>
+                <td><h6>Cell Phone:</h6></td>
+                <td><i class="icon-headphones"></i><%= lastUser.phone %></td>
+            </tr>
+            <tr>
+                <td><h6>Email:</h6></td>
+                <td><i class="icon-envelope"></i> <a href="mailto:<%= lastUser.email %>"><%= lastUser.email %></a>
+                </td>
+            </tr>
+            <tr>
+                <td><h6>Web-site:</h6></td>
+                <td><i class="icon-retweet"></i> <a href="http://<%= lastUser.web_site %>"><%= lastUser.web_site %></a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

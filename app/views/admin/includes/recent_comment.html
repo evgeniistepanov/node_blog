@@ -1,0 +1,18 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        <h3 class="panel-title">Recent Comment</h3>
+    </div>
+    <div class="panel-body">
+        <div class="media">
+            <a class="pull-left">
+                <img class="media-object" height="64px" src="/public/img/user_avatars/albert.jpg" alt="">
+            </a>
+            <div class="media-body">
+                <h4 class="media-heading">
+                    <small><a href="/view_user/<%= lastComment.user_name %>" style="font-weight: bold;"><%= lastComment.user_name %></a> <%= lastComment.date %></small>
+                </h4>
+                <%= lastComment.comment_content %>
+            </div>
+        </div>
+    </div>
+</div>
