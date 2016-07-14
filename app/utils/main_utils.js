@@ -1,15 +1,42 @@
-var mainUtils = {
+var Config = require('../config/config');
+var _ = require('lodash');
+var dateUtils = require('../utils/date');
 
+var mainUtils = {
     pagination: {
         postsPerPage: 10,
         from: 1,
         to: 1,
-        pageType: '',
         skip: 0,
         currentPage: 0,
         rowCounter: 0,
         nextPage: 0,
         prevPage: 0,
+        pageType: '',
+        category: '',
+
+        setDefaultOptions: function () {
+            this.postsPerPage = 10;
+            this.from = 1;
+            this.to = 1;
+            this.skip = 0;
+            this.currentPage = 0;
+            this.rowCounter = 0;
+            this.nextPage = 0;
+            this.prevPage = 0;
+            this.pageType = '';
+            this.category = '';
+        },
+
+        checkCurrentPage: function () {
+            var check = true;
+            if (isNaN(this.currentPage)) {
+                check = false;
+            } else if (this.to < this.currentPage || this.currentPage <= 0) {
+                check = false;
+            }
+            return check;
+        },
 
         countSkipRows: function () {
             if (this.currentPage > 1) {
@@ -20,7 +47,7 @@ var mainUtils = {
         },
 
         changePaginationObj: function () {
-            this.to = this.rowCounter / this.postsPerPage - (this.rowCounter / this.postsPerPage)%1;
+            this.to = this.rowCounter / this.postsPerPage - (this.rowCounter / this.postsPerPage) % 1;
             if (this.rowCounter % this.postsPerPage > 0) {
                 this.to += 1;
             }
@@ -40,69 +67,74 @@ var mainUtils = {
     },
 
     posts: {
-        /*  makePostsPreview: function (posts) {
-         posts.forEach(function (item) {
-         var index = item.content.indexOf(Config.previewTag);
-         if (index !== -1) {
-         item.content = item.content.slice(0, index);
-         }
-         });
-         },
+        postsData: null,
 
-         preparePostsForRender: function (results) {
-         this.makePostsPreview(results);
+        makePostsPreview: function (posts) {
+            posts.forEach(function (item) {
+                var index = item.content.indexOf(Config.previewTag);
+                if (index !== -1) {
+                    item.content = item.content.slice(0, index);
+                }
+            });
+        },
 
-         var postsData = {
-         posts: results,
-         page: pageNumber,
-         rowCounter: rowCounter,
-         paginationObj: paginationConfig.paginationObj,
-         categoriesSidebar: mainUtils.sliceCategories(categoriesData)
-         };
+        preparePostsForRender: function (results) {
+            this.makePostsPreview(results);
 
-         postsData.posts.forEach(function (item) {
-         item.date = dateUtils.convertToDayMonthYear(item.date)
-         });
+            this.postsData = {
+                posts: results,
+                page: mainUtils.pagination.currentPage,
+                rowCounter: mainUtils.pagination.rowCounter,
+                paginationObj: mainUtils.pagination,
+                categoriesSidebar: mainUtils.categories.sliceCategories(mainUtils.categories.categoriesData)
+            };
 
-         addCategoriesToPosts(postsData);
+            this.postsData.posts.forEach(function (item) {
+                item.date = dateUtils.convertToDayMonthYear(item.date)
+            });
 
-         return postsData;
-         },
+            mainUtils.categories.addCategoriesToPosts(this.postsData);
 
-         addCategoriesToPosts: function (postsData) {
-         var obj = {};
-         postCategories.forEach(function (item) {
-         var category_obj = {};
-         if (Array.isArray(obj[item.post_id])) {
-         category_obj.category_name = _.find(categoriesData, {category_id: item.category_id}).category_name;
-         category_obj.category_id = item.category_id;
-         obj[item.post_id].push(category_obj);
-         } else {
-         obj[item.post_id] = [];
-         category_obj.category_name = _.find(categoriesData, {category_id: item.category_id}).category_name;
-         category_obj.category_id = item.category_id;
-         obj[item.post_id].push(category_obj);
-         }
-         });
-
-         postsData.posts.forEach(function (item) {
-         if (obj[item.post_id]) {
-         item.categories = obj[item.post_id];
-         }
-         });
-         }*/
-
+            return this.postsData;
+        }
     },
 
+    categories: {
+        categoriesData: null,
+        postCategories: null,
 
-    sliceCategories: function (categories) {
-        var half = +(categories.length / 2).toFixed();
-        var firstPart = categories.slice(0, half);
-        var secondPart = categories.slice(half, categories.length);
+        sliceCategories: function (categories) {
+            var half = +(categories.length / 2).toFixed();
+            var firstPart = categories.slice(0, half);
+            var secondPart = categories.slice(half, categories.length);
 
-        return {
-            firstPart: firstPart,
-            secondPart: secondPart
+            return {
+                firstPart: firstPart,
+                secondPart: secondPart
+            }
+        },
+
+        addCategoriesToPosts: function (postsData) {
+            var obj = {};
+            this.postCategories.forEach(function (item) {
+                var category_obj = {};
+                if (Array.isArray(obj[item.post_id])) {
+                    category_obj.category_name = _.find(this.categoriesData, {category_id: item.category_id}).category_name;
+                    category_obj.category_id = item.category_id;
+                    obj[item.post_id].push(category_obj);
+                } else {
+                    obj[item.post_id] = [];
+                    category_obj.category_name = _.find(this.categoriesData, {category_id: item.category_id}).category_name;
+                    category_obj.category_id = item.category_id;
+                    obj[item.post_id].push(category_obj);
+                }
+            }, this);
+
+            postsData.posts.forEach(function (item) {
+                if (obj[item.post_id]) {
+                    item.categories = obj[item.post_id];
+                }
+            });
         }
     }
 };

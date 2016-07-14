@@ -8,34 +8,24 @@ var mainUtils = require('../utils/main_utils.js');
 var dateUtils = require('../utils/date.js');
 var CategoryModel = require('../models/categories.js');
 
-var paginationConfig = {
-    postsPerPage: 10,
-    paginationObj: {
-        from: 1,
-        to: 1,
-        pageType: '/view_category/'
-    },
-    skip: 0
-};
-
-var pageNumber,
-    rowCounter,
-    categoriesData,
+var categoriesData,
     postCategories,
     categoryName;
 
 router.get('/:category', function (req, res, next) {
     categoryName = req.params.category;
-    paginationConfig.paginationObj.category = categoryName;
-    pageNumber = 1;
-    countSkipRows();
+    mainUtils.pagination.setDefaultOptions();
+    mainUtils.pagination.pageType = '/view_category/';
+    mainUtils.pagination.category = categoryName;
+    mainUtils.pagination.currentPage = 1;
+    mainUtils.pagination.countSkipRows();
 
     CategoryModel.createConnection();
     CategoryModel.connection.connect();
 
     Q.all([CategoryModel.countPostsWithCategory(categoryName), CategoryModel.getCategories()])
         .then(function (results) {
-            rowCounter = results[0][0][0].rowCounter;
+            mainUtils.pagination.rowCounter = results[0][0][0].rowCounter;
             categoriesData = results[1][0];
 
             if (!_.find(categoriesData, {category_name: categoryName})) {
@@ -47,9 +37,9 @@ router.get('/:category', function (req, res, next) {
             CategoryModel.getPostsCategories()
                 .then(function (results) {
                     postCategories = results[0];
-                    changePaginationObj();
+                    mainUtils.pagination.changePaginationObj();
 
-                    CategoryModel.getPostsWithCategory(categoryName, paginationConfig)
+                    CategoryModel.getPostsWithCategory(categoryName, mainUtils.pagination)
                         .then(function (results) {
                             res.render('main.html', preparePostsForRender(results[0]));
                             CategoryModel.connection.end();
@@ -62,17 +52,20 @@ router.get('/:category', function (req, res, next) {
 });
 
 router.get('/:category/page/:number', function (req, res, next) {
-    pageNumber = +req.params.number;
+    mainUtils.pagination.setDefaultOptions();
+    mainUtils.pagination.currentPage = +req.params.number;
     categoryName = req.params.category;
-    paginationConfig.paginationObj.category = categoryName;
-    countSkipRows();
+
+    mainUtils.pagination.pageType = '/view_category/';
+    mainUtils.pagination.category = categoryName;
+    mainUtils.pagination.countSkipRows();
 
     CategoryModel.createConnection();
     CategoryModel.connection.connect();
 
     Q.all([CategoryModel.countPostsWithCategory(categoryName), CategoryModel.getCategories()])
         .then(function (results) {
-            rowCounter = results[0][0][0].rowCounter;
+            mainUtils.pagination.rowCounter = results[0][0][0].rowCounter;
             categoriesData = results[1][0];
 
             if (!_.find(categoriesData, {category_name: categoryName})) {
@@ -84,15 +77,15 @@ router.get('/:category/page/:number', function (req, res, next) {
             CategoryModel.getPostsCategories()
                 .then(function (results) {
                     postCategories = results[0];
-                    changePaginationObj();
+                    mainUtils.pagination.changePaginationObj();
 
-                    if (!checkPageNumber()) {
+                    if (!mainUtils.pagination.checkCurrentPage()) {
                         res.redirect('/404');
                         CategoryModel.connection.end();
                         return;
                     }
 
-                    CategoryModel.getPostsWithCategory(categoryName, paginationConfig)
+                    CategoryModel.getPostsWithCategory(categoryName, mainUtils.pagination)
                         .then(function (results) {
                             res.render('main.html', preparePostsForRender(results[0]));
                             CategoryModel.connection.end();
@@ -102,48 +95,7 @@ router.get('/:category/page/:number', function (req, res, next) {
         .catch(function (error) {
             console.log(error);
         });
-
-    function checkPageNumber() {
-        var check = true;
-        if (isNaN(pageNumber)) {
-            check = false;
-        } else if (paginationConfig.paginationObj.to < pageNumber || pageNumber <= 0) {
-            check = false;
-        }
-        return check;
-    }
-
 });
-
-function countSkipRows() {
-    if (pageNumber > 1) {
-        paginationConfig.skip = paginationConfig.postsPerPage * (pageNumber - 1);
-    } else {
-        paginationConfig.skip = 0;
-    }
-}
-
-function changePaginationObj() {
-    paginationConfig.paginationObj.currentPage = pageNumber;
-    paginationConfig.paginationObj.rowCounter = rowCounter;
-    paginationConfig.paginationObj.to = +(rowCounter / paginationConfig.postsPerPage).toFixed();
-
-    if (rowCounter % paginationConfig.postsPerPage > 0) {
-        paginationConfig.paginationObj.to += 1;
-    }
-
-    if (pageNumber !== 1) {
-        paginationConfig.paginationObj.prevPage = pageNumber - 1;
-    } else {
-        paginationConfig.paginationObj.prevPage = 0;
-    }
-
-    if (pageNumber !== paginationConfig.paginationObj.to) {
-        paginationConfig.paginationObj.nextPage = pageNumber + 1;
-    } else {
-        paginationConfig.paginationObj.nextPage = 0;
-    }
-}
 
 function makePostsPreview(posts) {
     posts.forEach(function (item) {
@@ -159,10 +111,10 @@ function preparePostsForRender(results) {
 
     var postsData = {
         posts: results,
-        page: pageNumber,
-        rowCounter: rowCounter,
-        paginationObj: paginationConfig.paginationObj,
-        categoriesSidebar: mainUtils.sliceCategories(categoriesData)
+        page: mainUtils.pagination.currentPage,
+        rowCounter: mainUtils.pagination.rowCounter,
+        paginationObj: mainUtils.pagination,
+        categoriesSidebar: mainUtils.categories.sliceCategories(categoriesData)
     };
 
     postsData.posts.forEach(function (item) {

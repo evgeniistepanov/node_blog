@@ -26,6 +26,7 @@ router.get('/', function (req, res, next) {
     getCategories()
         .then(function (results) {
             categoriesData = results[0];
+            res.status(404);
             res.render('page_404.html', preparePageData())
             connection.end();
         });
