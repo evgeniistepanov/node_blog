@@ -76,7 +76,7 @@ router.get('/:id', function (req, res, next) {
             date: dateUtils.convertToDayMonthYear(results[0].date),
             postCategories: postCategories,
             postComments: postComments,
-            categoriesSidebar: mainUtils.sliceCategories(categoriesData)
+            categoriesSidebar: mainUtils.categories.sliceCategories(categoriesData)
         };
 
         postData.postComments.forEach(function (item) {

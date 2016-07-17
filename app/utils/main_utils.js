@@ -104,6 +104,10 @@ var mainUtils = {
         postCategories: null,
 
         sliceCategories: function (categories) {
+            if (!categories) {
+                return categories;
+            }
+
             var half = +(categories.length / 2).toFixed();
             var firstPart = categories.slice(0, half);
             var secondPart = categories.slice(half, categories.length);

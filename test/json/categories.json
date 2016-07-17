@@ -1,0 +1,22 @@
+[
+  {
+    "category_id": 1,
+    "category_name": "javascript"
+  },
+  {
+    "category_id": 2,
+    "category_name": "php"
+  },
+  {
+    "category_id": 3,
+    "category_name": "seo"
+  },
+  {
+    "category_id": 4,
+    "category_name": "web-development"
+  },
+  {
+    "category_id": 5,
+    "category_name": "angular"
+  }
+]

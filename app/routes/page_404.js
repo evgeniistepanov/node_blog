@@ -3,6 +3,9 @@ var router = express.Router();
 var posts = require('../json/posts.json');
 var mysql = require('mysql');
 var Q = require('Q');
+
+var PostsModel = require('../models/posts');
+
 var dateUtils = require('../utils/date.js');
 var mainUtils = require('../utils/main_utils.js');
 
@@ -19,17 +22,42 @@ function connectToMySQL() {
 }
 
 router.get('/', function (req, res, next) {
-    var categoriesData;
+    /*var categoriesData;
 
-    connectToMySQL();
+    connectToMySQL();*/
 
-    getCategories()
+
+    PostsModel.createConnection();
+    PostsModel.connection.connect();
+    mainUtils.pagination.skip = 0;
+    mainUtils.pagination.postsPerPage = 10;
+
+    PostsModel.getPostsWithUsers(mainUtils.pagination)
+        .then(function(result){
+            console.log(result);
+            var b = [result[0][0]];
+            var bLength = b[0].content.length;
+
+            //mainUtils.posts.preparePostsForRender(b);
+
+            mainUtils.posts.makePostsPreview(b);
+
+            console.log(b);
+            //mainUtils.categories.addCategoriesToPosts(this.postsData);
+        });
+
+/*    getCategories()
         .then(function (results) {
             categoriesData = results[0];
+
+
+
+
+
             res.status(404);
             res.render('page_404.html', preparePageData())
             connection.end();
-        });
+        });*/
 
     function getCategories() {
         var defered = Q.defer(),

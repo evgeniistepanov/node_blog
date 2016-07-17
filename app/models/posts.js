@@ -27,7 +27,6 @@ Posts.getPostsWithUsers = function (paginationConfig) {
         '  WHERE comment.post_id = post.post_id) as comments_counter FROM post' +
         ' LEFT JOIN user USING (user_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
     var defered = this.Q.defer();
-        //sql = 'SELECT * FROM post LEFT JOIN user USING (user_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
     this.connection.query(sql, defered.makeNodeResolver());
 
     defered.promise.catch(function (error) {
