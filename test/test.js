@@ -1,5 +1,16 @@
-var assert = require('chai').assert;
+
+
+var chai = require("chai");
+chai.should();
+chai.use(require('chai-things'));
+
+
+/*var assert = require('chai').assert;
 var expect = require('chai').expect;
+var request = require('supertest');*/
+
+var assert = chai.assert;
+var expect = chai.expect;
 var request = require('supertest');
 
 
@@ -16,6 +27,8 @@ var PostsModel = require('../app/models/posts');
 
 var posts = require('./json/posts');
 var categories = require('./json/categories');
+var post_categories = require('./json/post_categories');
+var postsWithUsers = require('./json/posts_with_users');
 
 debugger;
 
@@ -125,11 +138,30 @@ describe('Posts', function() {
             assert.equal(dateStr.search(datePattern), 0);
         });
 
+    });
 
+    describe('preparePostsForRender', function() {
+        it('should return obj with next properties' +
+            'posts, page, rowCounter, paginationObj, categoriesSidebar', function() {
+            var resultObj = mainUtils.posts.preparePostsForRender(postsWithUsers);
+
+            assert.equal(resultObj.posts, postsWithUsers);
+            assert.isAtLeast(resultObj.page, 0);
+            assert.isAtLeast(resultObj.rowCounter, 0);
+
+            resultObj.paginationObj.should.include.keys(["postsPerPage", "from", "to",
+                "skip", "currentPage", "rowCounter", "nextPage", "prevPage", "pageType", "category"]);
+            resultObj.categoriesSidebar.should.include.keys(["firstPart", "secondPart"]);
+
+            resultObj.posts.should.all.satisfy(function(arg) {
+                return arg.date.search(/^(\d{1,2})-(\d{1,2})-(\d{4})$/) === 0;
+            });
+
+        });
 
     });
+    
 });
-
 
 
 describe('Categories', function() {
@@ -160,8 +192,64 @@ describe('Categories', function() {
             assert.deepEqual(slicedCategories.firstPart, categories.slice(0,3));
             assert.deepEqual(slicedCategories.secondPart, categories.slice(3,5));
         });
+    });
 
+   
+    
 
+    describe('addCategoriesToPosts', function() {
+        it('should add categories array to posts with categories,' +
+            ' first post with 2 categories, second posts with 3 categories, third post with 1 category', function() {
+            var postsData = {};
+            postsData.posts = _.cloneDeep(posts);
+
+            mainUtils.categories.postCategories = _.cloneDeep(post_categories);
+            mainUtils.categories.postCategories.splice(3, mainUtils.categories.length);
+            mainUtils.categories.categoriesData = categories;
+            mainUtils.categories.addCategoriesToPosts(postsData);
+
+            assert.equal(postsData.posts[0].categories.length, 2);
+            assert.equal(postsData.posts[0].categories[0].category_id, 4);
+            assert.equal(postsData.posts[0].categories[0].category_name, "web-development");
+            assert.equal(postsData.posts[0].categories[1].category_id, 1);
+            assert.equal(postsData.posts[0].categories[1].category_name, "javascript");
+
+            assert.equal(postsData.posts[1].categories.length, 3);
+            assert.equal(postsData.posts[1].categories[0].category_id, 4);
+            assert.equal(postsData.posts[1].categories[0].category_name, "web-development");
+            assert.equal(postsData.posts[1].categories[1].category_id, 2);
+            assert.equal(postsData.posts[1].categories[1].category_name, "php");
+            assert.equal(postsData.posts[1].categories[2].category_id, 5);
+            assert.equal(postsData.posts[1].categories[2].category_name, "angular");
+
+            assert.equal(postsData.posts[2].categories.length, 1);
+            assert.equal(postsData.posts[2].categories[0].category_id, 3);
+            assert.equal(postsData.posts[2].categories[0].category_name, "seo");
+        });
+
+        it('should add categories array to fifth post,' +
+            ' fifth post should have 2 categories (web-development & seo)', function() {
+            var postsData = {};
+            postsData.posts = _.cloneDeep(posts);
+            mainUtils.categories.postCategories = _.cloneDeep(post_categories).splice(5, 10);
+            mainUtils.categories.categoriesData = categories;
+            mainUtils.categories.addCategoriesToPosts(postsData);
+
+            assert.equal(postsData.posts[5].categories.length, 2);
+            assert.equal(postsData.posts[5].categories[0].category_id, 4);
+            assert.equal(postsData.posts[5].categories[0].category_name, "web-development");
+            assert.equal(postsData.posts[5].categories[1].category_id, 3);
+            assert.equal(postsData.posts[5].categories[1].category_name, "seo");
+        });
+
+        it('should not add categories array to all posts', function() {
+            var postsData = {};
+            postsData.posts = _.cloneDeep(posts);
+            mainUtils.categories.postCategories = post_categories;
+            mainUtils.categories.categoriesData = [];
+            mainUtils.categories.addCategoriesToPosts(postsData);
+            postsData.posts.should.all.not.have.property('categories');
+        });
     });
 });
 

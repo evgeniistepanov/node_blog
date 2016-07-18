@@ -100,8 +100,10 @@ var mainUtils = {
     },
 
     categories: {
-        categoriesData: null,
-        postCategories: null,
+        //categoriesData: null,
+        categoriesData: [],
+        postCategories: [],
+        //postCategories: null,
 
         sliceCategories: function (categories) {
             if (!categories) {
@@ -119,6 +121,11 @@ var mainUtils = {
         },
 
         addCategoriesToPosts: function (postsData) {
+
+            if (this.postCategories.length === 0 || this.categoriesData.length === 0) {
+                return;
+            }
+
             var obj = {};
             this.postCategories.forEach(function (item) {
                 var category_obj = {};
