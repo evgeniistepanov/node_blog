@@ -1,28 +1,28 @@
-var BaseModel = require('./base_model.js');
-var Posts = Object.create(BaseModel);
+var baseModel = require('./base_model.js');
+var posts = Object.create(baseModel);
 
-Posts.countPosts = function () {
+posts.countPosts = function () {
     var defered = this.Q.defer(),
         sql = 'SELECT COUNT(*) AS rowCounter FROM post';
     this.connection.query(sql, defered.makeNodeResolver());
     return defered.promise;
 };
 
-Posts.getCategories = function () {
+posts.getCategories = function () {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM category';
     this.connection.query(sql, defered.makeNodeResolver());
     return defered.promise;
 };
 
-Posts.getPostsCategories = function () {
+posts.getPostsCategories = function () {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM post_category';
     this.connection.query(sql, defered.makeNodeResolver());
     return defered.promise;
 };
 
-Posts.getPostsWithUsers = function (paginationConfig) {
+posts.getPostsWithUsers = function (paginationConfig) {
     var sql = 'SELECT *, (SELECT COUNT(post_id) FROM comment' +
         '  WHERE comment.post_id = post.post_id) as comments_counter FROM post' +
         ' LEFT JOIN user USING (user_id) ORDER BY post_id DESC LIMIT ' + paginationConfig.skip + ', ' + paginationConfig.postsPerPage;
@@ -36,7 +36,7 @@ Posts.getPostsWithUsers = function (paginationConfig) {
     return defered.promise;
 };
 
-Posts.getSinglePostCategories = function (id) {
+posts.getSinglePostCategories = function (id) {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM `post_category` LEFT JOIN category USING (category_id) WHERE post_id =' + this.connection.escape(id);
     this.connection.query(sql, defered.makeNodeResolver());
@@ -44,7 +44,7 @@ Posts.getSinglePostCategories = function (id) {
     return defered.promise;
 };
 
-Posts.getSinglePost = function (id) {
+posts.getSinglePost = function (id) {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM post LEFT JOIN user USING (user_id) WHERE post_id = ' + this.connection.escape(id);
     this.connection.query(sql, defered.makeNodeResolver());
@@ -55,4 +55,4 @@ Posts.getSinglePost = function (id) {
     return defered.promise;
 };
 
-module.exports = Posts;
+module.exports = posts;

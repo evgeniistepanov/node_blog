@@ -3,15 +3,10 @@ var router = express.Router();
 var posts = require('../json/posts.json');
 var Q = require('Q');
 
-var dateUtils = require('../utils/date.js')
-var mainUtils = require('../utils/main_utils.js')
+var mainUtils = require('../utils/main_utils.js');
 
-var PostsModel = require('../models/posts.js');
-var CommentsModel = require('../models/comments.js');
-
-var categoriesData,
-    postCategories = [],
-    postComments = [];
+var postsModel = require('../models/posts.js');
+var commentsModel = require('../models/comments.js');
 
 router.get('/', function (req, res, next) {
     connectToMySQL();
@@ -45,46 +40,33 @@ router.get('/', function (req, res, next) {
 router.get('/:id', function (req, res, next) {
     var id = +req.params.id;
 
-    PostsModel.createConnection();
-    PostsModel.connection.connect();
-    CommentsModel.setConnection(PostsModel.connection);
+    postsModel.createConnection();
+    postsModel.connection.connect();
+    commentsModel.setConnection(postsModel.connection);
 
-    Q.all([PostsModel.getCategories(), PostsModel.getSinglePostCategories(id), CommentsModel.getCommentsForPost(id)])
+    Q.all([postsModel.getCategories(), postsModel.getSinglePostCategories(id), commentsModel.getCommentsForPost(id)])
         .then(function (results) {
-            categoriesData = results[0][0];
-            postCategories = results[1][0];
-            postComments = results[2][0];
-            PostsModel.getSinglePost(id)
+            mainUtils.categories.categoriesData = results[0][0];
+            mainUtils.singlePost.postCategories = results[1][0];
+            mainUtils.singlePost.postComments = results[2][0];
+
+            postsModel.getSinglePost(id)
                 .then(function (results) {
-                    
+
                     if (results[0].length === 0) {
                         res.redirect('/404');
-                        PostsModel.connection.end();
+                        postsModel.connection.end();
                         return;
                     }
 
-                    res.render('view_post.html', prepareSinglePostForRender(results[0]));
-                    PostsModel.connection.end();
+                    res.render('view_post.html', mainUtils.singlePost.prepareSinglePostForRender(results[0]));
+                    postsModel.connection.end();
                 });
+        })
+        .catch(function (error) {
+            console.log(error);
+            res.status(500);
         });
-
-    function prepareSinglePostForRender(results) {
-        var postData = {
-            user: results[0].user_name,
-            title: results[0].title,
-            content: results[0].content,
-            date: dateUtils.convertToDayMonthYear(results[0].date),
-            postCategories: postCategories,
-            postComments: postComments,
-            categoriesSidebar: mainUtils.categories.sliceCategories(categoriesData)
-        };
-
-        postData.postComments.forEach(function (item) {
-            item.date = dateUtils.convertToDayMonthYear(item.date)
-        });
-
-        return postData;
-    }
 });
 
 

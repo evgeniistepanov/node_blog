@@ -1,7 +1,7 @@
-var BaseModel = require('./base_model.js');
-var PostCategories = Object.create(BaseModel);
+var baseModel = require('./base_model.js');
+var postCategories = Object.create(baseModel);
 
-PostCategories.getPostsWithCategory = function (category, paginationConfig) {
+postCategories.getPostsWithCategory = function (category, paginationConfig) {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM post' +
             ' JOIN post_category ON post.post_id = post_category.post_id' +
@@ -16,7 +16,7 @@ PostCategories.getPostsWithCategory = function (category, paginationConfig) {
     return defered.promise;
 };
 
-PostCategories.countPostsWithCategory = function (category) {
+postCategories.countPostsWithCategory = function (category) {
     var defered = this.Q.defer(),
         sql = 'SELECT COUNT(*) AS rowCounter FROM post' +
             ' JOIN post_category ON post.post_id = post_category.post_id' +
@@ -26,19 +26,19 @@ PostCategories.countPostsWithCategory = function (category) {
     return defered.promise;
 };
 
-PostCategories.getCategories = function () {
+postCategories.getCategories = function () {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM category';
     this.connection.query(sql, defered.makeNodeResolver());
     return defered.promise;
 };
 
-PostCategories.getPostsCategories = function () {
+postCategories.getPostsCategories = function () {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM post_category';
     this.connection.query(sql, defered.makeNodeResolver());
     return defered.promise;
 };
 
-module.exports = PostCategories;
+module.exports = postCategories;
 

@@ -33,6 +33,9 @@ router.get('/', function (req, res, next) {
             pageData.dataForChart = {labels: labels, counters: counters};
             res.render('admin/index.html', pageData);
             AdminPanelModel.connection.end();
+        })
+        .catch(function (err) {
+            console.log(err);
         });
 });
 

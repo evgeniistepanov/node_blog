@@ -85,17 +85,17 @@
                     <% if (paginationObj.prevPage === 0) { %>
                     <li class="disabled"><span aria-hidden="true">«</span></li>
                     <% } else{ %>
-                    <li><a href="/admin/posts/<%= paginationObj.prevPage %>" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
+                    <li><a href="/admin/posts/page/<%= paginationObj.prevPage %>" aria-label="Previous"><span aria-hidden="true">«</span></a></li>
                     <% } %>
 
                     <% for(var i = paginationObj.from; i <= paginationObj.to; i++) { %>
-                    <li class="<% if (i === paginationObj.currentPage) { %><%= 'active' %><% } %>"><a href='/admin/posts/<%= i %>'>
+                    <li class="<% if (i === paginationObj.currentPage) { %><%= 'active' %><% } %>"><a href='/admin/posts/page/<%= i %>'>
                         <%= i %></a></li><% } %>
 
                     <% if (paginationObj.nextPage === 0) { %>
                     <li class="disabled"><span aria-hidden="true">»</span></li>
                     <% } else{ %>
-                    <li><a href="/admin/posts/<%= paginationObj.nextPage %>" aria-label="Next">
+                    <li><a href="/admin/posts/page/<%= paginationObj.nextPage %>" aria-label="Next">
                         <span aria-hidden="true">»</span>
                     </a></li>
                     <% } %>

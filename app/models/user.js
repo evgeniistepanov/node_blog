@@ -1,7 +1,7 @@
-var BaseModel = require('./base_model.js');
-var User = Object.create(BaseModel);
+var baseModel = require('./base_model.js');
+var user = Object.create(baseModel);
 
-User.getUserInfo = function(username) {
+user.getUserInfo = function(username) {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM user WHERE user_name = ' + this.connection.escape(username);
     this.connection.query(sql, defered.makeNodeResolver());
@@ -11,7 +11,7 @@ User.getUserInfo = function(username) {
     return defered.promise;
 };
 
-User.getLastUser = function() {
+user.getLastUser = function() {
     var defered = this.Q.defer(),
         sql = 'SELECT * FROM user ORDER BY user_id DESC LIMIT 1';
     this.connection.query(sql, defered.makeNodeResolver());
@@ -21,7 +21,5 @@ User.getLastUser = function() {
     return defered.promise;
 };
 
-
-
-module.exports = User;
+module.exports = user;
 

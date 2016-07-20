@@ -99,11 +99,34 @@ var mainUtils = {
         }
     },
 
-    categories: {
-        //categoriesData: null,
-        categoriesData: [],
+    singlePost: {
+        postComments: [],
         postCategories: [],
-        //postCategories: null,
+        postData: null,
+
+        prepareSinglePostForRender: function (results) {
+            this.postData = {
+                user: results[0].user_name,
+                title: results[0].title,
+                content: results[0].content,
+                date: dateUtils.convertToDayMonthYear(results[0].date),
+                postCategories: this.postCategories,
+                postComments: this.postComments,
+                categoriesSidebar: mainUtils.categories.sliceCategories(mainUtils.categories.categoriesData)
+            };
+
+            this.postData.postComments.forEach(function (item) {
+                item.date = dateUtils.convertToDayMonthYear(item.date)
+            });
+
+            return this.postData;
+        }
+    },
+
+    categories: {
+        categoriesData: [],
+        postsCategories: [],
+        categoryName: '',
 
         sliceCategories: function (categories) {
             if (!categories) {
@@ -122,12 +145,12 @@ var mainUtils = {
 
         addCategoriesToPosts: function (postsData) {
 
-            if (this.postCategories.length === 0 || this.categoriesData.length === 0) {
+            if (this.postsCategories.length === 0 || this.categoriesData.length === 0) {
                 return;
             }
 
             var obj = {};
-            this.postCategories.forEach(function (item) {
+            this.postsCategories.forEach(function (item) {
                 var category_obj = {};
                 if (Array.isArray(obj[item.post_id])) {
                     category_obj.category_name = _.find(this.categoriesData, {category_id: item.category_id}).category_name;

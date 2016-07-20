@@ -9,9 +9,6 @@ var mainUtils = require('../../utils/main_utils');
 
 
 var PostsModel = require('../../models/posts');
-var AdminPanelModel = require('../../models/admin_panel');
-var CommentsModel = require('../../models/comments');
-var UserModel = require('../../models/user');
 
 var paginationConfig = {
     postsPerPage: 10,
@@ -48,11 +45,15 @@ router.get('/', function (req, res, next) {
                     PostsModel.connection.end();
                 });
         });
-    });
+    })
+        .catch(function (err) {
+            console.log(err);
+        });
+
 
 });
 
-router.get('/:number', function (req, res, next) {
+router.get('/page/:number', function (req, res, next) {
     pageNumber = +req.params.number;
     countSkipRows();
 
@@ -68,6 +69,7 @@ router.get('/:number', function (req, res, next) {
                 changePaginationObj();
 
                 if (!checkPageNumber()) {
+                    res.status(404);
                     res.redirect('/404');
                     PostsModel.connection.end();
                     return;
@@ -80,7 +82,11 @@ router.get('/:number', function (req, res, next) {
                     });
             }
         );
-    });
+    })
+        .catch(function (err) {
+            console.log(err);
+        });
+
 
     function checkPageNumber() {
         var check = true;
@@ -93,7 +99,6 @@ router.get('/:number', function (req, res, next) {
     }
 
 });
-
 
 
 function countSkipRows() {
@@ -143,7 +148,7 @@ function preparePostsForRender(results) {
         page: pageNumber,
         rowCounter: rowCounter,
         paginationObj: paginationConfig.paginationObj,
-        categoriesSidebar: mainUtils.sliceCategories(categoriesData)
+        categoriesSidebar: mainUtils.categories.sliceCategories(categoriesData)
     };
 
     postsData.posts.forEach(function (item) {
@@ -177,8 +182,6 @@ function addCategoriesToPosts(postsData) {
         }
     });
 }
-
-
 
 
 module.exports = router;

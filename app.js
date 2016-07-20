@@ -37,6 +37,7 @@ app.use('/view_user', view_user);
 
 app.use('/admin', admin);
 app.use('/admin/posts', admin_posts);
+//app.use('/admin/posts/page/:number', admin_posts);
 
 app.use('/404', page_404);
 //app.use('/page/:number', index);
@@ -46,7 +47,12 @@ app.use(function(req, res, next) {
     /*    var err = new Error('Not Found');
      err.status = 404;
      next(err);*/
-    res.status(404).render('page_404.html');
+    res.status(404);
+    res.redirect('/404');
+
+    /*res.status(505);
+    console.log(505);*/
+    //res.status(404).render('page_404.html');
 });
 
 module.exports = app;
